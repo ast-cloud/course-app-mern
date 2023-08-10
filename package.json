@@ -13,7 +13,7 @@
     "prettier": "^2.5.1",
     "turbo": "latest"
   },
-  "name": "CourseApp",
+  "name": "course_app",
   "packageManager": "npm@9.5.0",
   "workspaces": [
     "apps/*",
