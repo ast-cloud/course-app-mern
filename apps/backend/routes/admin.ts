@@ -42,6 +42,10 @@ router.post('/login', async (req, res) => {
       res.status(400).send('Insufficient parameters supplied.');
     }
 });
+
+router.get('/me', adminAuth, (req,res)=>{
+  res.json({username: req.headers['username']});
+});
   
 router.post('/courses', adminAuth, async (req, res) => {
     // logic to create a course
@@ -54,7 +58,7 @@ router.post('/courses', adminAuth, async (req, res) => {
       res.json({message:'Course created successfully', courseId: a.id});
     }
     else{
-      res.status(401).send({message:'Insufficient parameters supplied'});
+      res.status(400).send({message:'Insufficient parameters supplied'});
     }
 });
   

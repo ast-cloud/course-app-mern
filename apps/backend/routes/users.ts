@@ -46,7 +46,7 @@ router.get('/me', userAuth, async (req, res)=>{
     res.json({username: req.headers['username']});
 });
   
-router.get('/courses', userAuth, async (req, res) => {
+router.get('/courses', async (req, res) => {
     // logic to list all courses
     var a = await Course.find({published: true});
     res.json({courses: a});
@@ -80,6 +80,7 @@ router.get('/purchasedCourses', userAuth, async (req, res) => {
     
     var user = await User.findOne({username: req.headers['username']});
     if(user){
+      console.log('user.purchasedCourses - '+JSON.stringify(user.purchasedCourses.length));
       res.json({purchasedCoursesIds: user.purchasedCourses || []});
     }
     else{
@@ -87,8 +88,29 @@ router.get('/purchasedCourses', userAuth, async (req, res) => {
     }
   
 });
+
+router.get('/purchasedCoursesDetails', userAuth, async (req, res) => {
+  // logic to view purchased courses details
   
-router.get('/course/:courseId', userAuth, async (req, res)=>{
+  var user = await User.findOne({username: req.headers['username']});
+  if(user){
+    if(user.purchasedCourses.length==0){
+
+    }
+    else{
+      var purchasedCoursesDetails = await Course.find({_id:{$in: user.purchasedCourses}});
+      res.json({purchasedCoursesDetails: purchasedCoursesDetails});
+    }
+    // console.log('user.purchasedCourses'+user.purchasedCourses);
+    // res.json({purchasedCoursesIds: user.purchasedCourses || []});
+  }
+  else{
+    res.status(400).json({message:'User not found'});
+  }
+
+});
+  
+router.get('/course/:courseId', async (req, res)=>{
     var courseId = req.params.courseId;
     var a = await Course.findById(courseId);
     if(a){

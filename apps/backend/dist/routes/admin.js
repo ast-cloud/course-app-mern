@@ -51,6 +51,9 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(400).send('Insufficient parameters supplied.');
     }
 }));
+router.get('/me', middleware_1.adminAuth, (req, res) => {
+    res.json({ username: req.headers['username'] });
+});
 router.post('/courses', middleware_1.adminAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // logic to create a course
     var newCourse = req.body;
@@ -60,7 +63,7 @@ router.post('/courses', middleware_1.adminAuth, (req, res) => __awaiter(void 0, 
         res.json({ message: 'Course created successfully', courseId: a.id });
     }
     else {
-        res.status(401).send({ message: 'Insufficient parameters supplied' });
+        res.status(400).send({ message: 'Insufficient parameters supplied' });
     }
 }));
 router.put('/courses/:courseId', middleware_1.adminAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {

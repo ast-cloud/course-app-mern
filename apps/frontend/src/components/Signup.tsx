@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Typography, Card, TextField, Button } from '@mui/material';
+import { useRecoilState } from 'recoil';
+import { isLoggedInState } from '../store/atoms/user';
+import {useNavigate} from 'react-router-dom';
+//import Cookies from 'js-cookie';
 
-export default function Signup(props){
+export default function Signup(){
+
+    const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInState);
+
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState('');
@@ -18,10 +26,17 @@ export default function Signup(props){
             return res.json();
         }).then(function(data){
             console.log(data);
+            //Cookies.set('token', data.token, {expires: 7});
             localStorage.setItem('token', data.token);
-            props.setIsLoggedIn(true);
+            setIsLoggedIn(true);
         });
     }
+    
+    useEffect(function(){
+        if(isLoggedIn){
+            navigate('/');
+        }
+    },[isLoggedIn]);
     
     return <div>
         <div style={{display:'flex', justifyContent:'center', marginTop:75}}>     
@@ -33,7 +48,7 @@ export default function Signup(props){
                 <br/><br/>
                 <TextField variant="outlined" fullWidth={true} label='Password' type="password" onChange={function(e){setPassword(e.target.value)}}></TextField>
                 <br/><br/><br/><br/>
-                <Button variant="contained" fullWidth={true} onClick={handleSignUp}>Sign Up</Button>
+                <Button variant="contained" fullWidth={true} sx={{backgroundColor:'#645cff'}} onClick={handleSignUp}>Sign Up</Button>
             </Card>
         </div>
     </div>

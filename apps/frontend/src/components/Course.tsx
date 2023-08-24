@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
-import {Typography, Card, CardMedia, CardContent, Button} from '@mui/material'
+import {Typography, Card, CardMedia, CardContent, Button} from '@mui/material';
 import {useParams} from 'react-router-dom';
 import axios from 'axios';
+import { useRecoilValue } from 'recoil';
+import { isLoggedInState } from '../store/atoms/user';
+import { useNavigate } from 'react-router-dom';
+
 
 
 export default function Course() {
@@ -9,23 +13,58 @@ export default function Course() {
     const {id} = useParams();
   
     const [course, setCourse] = useState(null);
+    const [isPurchased, setIsPurchased] = useState(null);
+
+    const isLoggedIn = useRecoilValue(isLoggedInState);
+
+    const navigate = useNavigate();
+
+    
+    
 
     useEffect(function(){
-        axios.get('http://localhost:3000/users/course/'+id, {
-            headers: {
-                'Authorization':'Bearer '+localStorage.getItem('token')
+        const fetchData = async ()=>{
+            const courseDetails = await axios.get('http://localhost:3000/users/course/'+id, {
+                headers: {
+                    'Authorization':'Bearer '+localStorage.getItem('token')
+                }
+            });
+            setCourse(courseDetails.data.course);
+
+            if(isLoggedIn){
+                const pCourses = await axios.get('http://localhost:3000/users/purchasedCourses', {
+                    headers: {
+                        'Authorization':'Bearer '+localStorage.getItem('token')
+                    }
+                });
+                if(pCourses.data.purchasedCoursesIds.includes(id)){
+                    setIsPurchased(true);
+                }
+                else{
+                    setIsPurchased(false);
+                }
+
             }
-        }).then(function(res){
-            setCourse(res.data.course);
-        });
+            
+        }
+        fetchData();
     },[]);
 
     function handleBuy(){
-        axios.get('http://localhost:3000/users/courses/'+course._id, {
-            headers:{
-                'Authorization':'Bearer '+localStorage.getItem('token')
-            }
-        });
+        if(isLoggedIn){
+            axios.get('http://localhost:3000/users/courses/'+course._id, {
+                headers:{
+                    'Authorization':'Bearer '+localStorage.getItem('token')
+                }
+            }).then(function(res){
+                if(res.status==200){
+                    setIsPurchased(true);
+                }
+            });
+        }
+        else{
+            navigate('/login');
+        }
     }
 
     return course==null ? <div>Loading....</div>
@@ -52,7 +91,9 @@ export default function Course() {
                     </div>
                     <br />
                     <div style={{display:'flex', justifyContent:'end'}}>
-                        <Button variant='outlined' size='small' onClick={handleBuy}>Buy Course</Button>
+                        {!isLoggedIn && <Button variant='outlined' size='small' onClick={handleBuy}>Buy Course</Button>}
+                        {isLoggedIn &&  isPurchased==true && <Typography>Purchased</Typography>}
+                        {isLoggedIn &&  isPurchased==false && <Button variant='outlined' size='small' onClick={handleBuy}>Buy Course</Button>}
                     </div>
                 </CardContent>
             </Card>

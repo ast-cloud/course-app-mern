@@ -12,25 +12,25 @@ const adminAuth = (req, res, next) => {
         var t = authHeader.split(' ')[1];
         jsonwebtoken_1.default.verify(t, exports.SECRET, function (err, decodedPayload) {
             if (err) {
-                return res.status(403).json({ message: 'Cannot verify token' });
+                return res.status(401).json({ message: 'Cannot verify token' });
             }
             if (!decodedPayload) {
-                return res.sendStatus(403);
+                return res.sendStatus(401);
             }
             if (typeof decodedPayload == 'string') {
-                return res.sendStatus(403);
+                return res.sendStatus(401);
             }
             if (decodedPayload.role == 'admin') {
                 req.headers['username'] = decodedPayload.username;
                 next();
             }
             else {
-                return res.status(403).json({ message: 'Forbidden' });
+                return res.status(401).json({ message: 'Unauthorized' });
             }
         });
     }
     else {
-        res.status(403).json({ message: 'Unauthorized' });
+        res.status(401).json({ message: 'Unauthorized' });
     }
 };
 exports.adminAuth = adminAuth;

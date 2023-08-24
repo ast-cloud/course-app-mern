@@ -54,7 +54,7 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 router.get('/me', middleware_1.userAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.json({ username: req.headers['username'] });
 }));
-router.get('/courses', middleware_1.userAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/courses', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // logic to list all courses
     var a = yield db_1.Course.find({ published: true });
     res.json({ courses: a });
@@ -84,13 +84,31 @@ router.get('/purchasedCourses', middleware_1.userAuth, (req, res) => __awaiter(v
     // logic to view purchased courses
     var user = yield db_1.User.findOne({ username: req.headers['username'] });
     if (user) {
+        console.log('user.purchasedCourses - ' + JSON.stringify(user.purchasedCourses.length));
         res.json({ purchasedCoursesIds: user.purchasedCourses || [] });
     }
     else {
         res.status(400).json({ message: 'User not found' });
     }
 }));
-router.get('/course/:courseId', middleware_1.userAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/purchasedCoursesDetails', middleware_1.userAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // logic to view purchased courses details
+    var user = yield db_1.User.findOne({ username: req.headers['username'] });
+    if (user) {
+        if (user.purchasedCourses.length == 0) {
+        }
+        else {
+            var purchasedCoursesDetails = yield db_1.Course.find({ _id: { $in: user.purchasedCourses } });
+            res.json({ purchasedCoursesDetails: purchasedCoursesDetails });
+        }
+        // console.log('user.purchasedCourses'+user.purchasedCourses);
+        // res.json({purchasedCoursesIds: user.purchasedCourses || []});
+    }
+    else {
+        res.status(400).json({ message: 'User not found' });
+    }
+}));
+router.get('/course/:courseId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var courseId = req.params.courseId;
     var a = yield db_1.Course.findById(courseId);
     if (a) {
